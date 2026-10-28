@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="QR Shield - Scan, inspect, and analyze QR codes safely before trusting them. Built for everyday users and UPI fraud prevention.">
+  <title>QR Shield | Pre-Scan Threat Inspector</title>
+  <meta property="og:title" content="QR Shield | Pre-Scan Threat Inspector">
+  <meta property="og:description" content="QR Shield - Scan, inspect, and analyze QR codes safely before trusting them. Built for everyday users and UPI fraud prevention.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">QR Shield</h1>
+          <p class="brand-tagline">Pre-Scan Threat & Phishing Inspector</p>
+        </div>
+      </div>
+      <!-- Simple Mode Toggle for Elders -->
+      <div class="elder-mode-toggle-wrap" role="region" aria-label="Simple mode toggle for elders">
+        <label class="elder-mode-toggle" for="toggle-simple-mode" title="Toggle simplified view with large cards and plain-language warnings for seniors">
+          <span class="elder-mode-icon" aria-hidden="true">👓</span>
+          <span class="elder-mode-text">
+            <strong>Simple Mode</strong>
+            <small>For Elders</small>
+          </span>
+          <input type="checkbox" id="toggle-simple-mode" class="visually-hidden">
+          <div class="switch-ui" id="switch-ui-slider">
+            <span class="switch-slider"></span>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Simple Mode Status Indicator Banner for Seniors -->
+    <div id="simple-mode-banner" class="simple-mode-banner" hidden>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.35rem;" aria-hidden="true">👓</span>
+        <div>
+          <strong style="color: #ffffff;">Simple Mode is Active:</strong>
+          <span>Big, elder-friendly card with simple Safe/Warning messages will be shown.</span>
+        </div>
+      </div>
+      <button type="button" id="btn-disable-simple-mode" class="btn btn-sm btn-outline" style="border-color: rgba(56, 189, 248, 0.4); color: #bae6fd;">
+        Switch to Detailed Mode
+      </button>
+    </div>
+
+    <!-- Scanner / Input Card -->
+    <section class="card input-card" aria-label="QR Input Methods">
+      <div class="card-header">
+        <h2 class="card-title">1. Supply a QR Code to Inspect</h2>
+        <p class="card-subtitle">Choose one of the 3 easy ways: upload an image, scan with your camera, or paste from your clipboard.</p>
+      </div>
+
+      <!-- Tab Buttons for Input Modes -->
+      <div class="tabs-container" role="tablist" aria-label="Input options">
+        <button id="tab-upload" class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-upload">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Image
+        </button>
+        <button id="tab-camera" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-camera">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Live Camera
+        </button>
+        <button id="tab-paste" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-paste">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+          Paste Screenshot (Ctrl+V)
+        </button>
+      </div>
+
+      <!-- Panel: Upload Image -->
+      <div id="panel-upload" class="tab-panel active" role="tabpanel" aria-labelledby="tab-upload">
+        <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Drop QR image here or click to browse">
+          <input type="file" id="file-input" accept="image/*" class="visually-hidden">
+          <div class="drop-zone-content">
+            <div class="drop-icon" aria-hidden="true">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <p class="drop-text-primary"><strong>Click to browse</strong> or drag and drop your QR code image here</p>
+            <p class="drop-text-secondary">PNG, JPG, WEBP, SVG, or screenshot captures</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Camera Scanner -->
+      <div id="panel-camera" class="tab-panel" role="tabpanel" aria-labelledby="tab-camera" hidden>
+        <div class="camera-wrapper">
+          <video id="camera-video" playsinline></video>
+          <div class="camera-overlay">
+            <div class="camera-reticle">
+              <span class="corner top-left"></span>
+              <span class="corner top-right"></span>
+              <span class="corner bottom-left"></span>
+              <span class="corner bottom-right"></span>
+              <div class="scan-laser"></div>
+            </div>
+            <p class="camera-hint">Align the QR code within the frame</p>
+          </div>
+        </div>
+        <div class="camera-controls">
+          <button id="btn-start-camera" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            Start Camera
+          </button>
+          <button id="btn-stop-camera" class="btn btn-secondary" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12"/></svg>
+            Stop Camera
+          </button>
+        </div>
+        <div id="camera-error" class="error-banner" hidden></div>
+      </div>
+
+      <!-- Panel: Paste Screenshot -->
+      <div id="panel-paste" class="tab-panel" role="tabpanel" aria-labelledby="tab-paste" hidden>
+        <div class="paste-zone" tabindex="0" id="paste-target">
+          <div class="paste-icon" aria-hidden="true">📋</div>
+          <p class="drop-text-primary">Press <strong>Ctrl + V</strong> (or <strong>Cmd + V</strong>) anywhere on this page</p>
+          <p class="drop-text-secondary">Take a screenshot of any QR code with Snipping Tool / screenshot shortcut and paste directly</p>
+        </div>
+      <!-- Quick Test Presets (from official test fixtures) -->
+      <div class="demo-samples-wrapper" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--border-subtle);">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; font-weight: 500;">
+          🧪 <strong>Try Official Test Examples (1-Click Instant Analysis):</strong>
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="https://www.wikipedia.org" style="border-color: rgba(16, 185, 129, 0.4); color: #34d399;">
+            ✅ Safe URL (Wikipedia)
+          </button>
+          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="https://bit.ly/3DemoXyz" style="border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
+            ⚠️ Caution (Shortener)
+          </button>
+          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="http://192.168.10.5/login/verify-kyc" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+            🚨 Danger (Raw IP + KYC Phish)
+          </button>
+          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="upi://pay?pa=demo.person@fakebank&pn=Demo%20Payee&am=250" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+            ⚡ Payment QR (UPI ₹250)
+          </button>
+          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="WIFI:S:Demo-Cafe;T:WPA;P:fakepass123;H:false;;" style="border-color: rgba(167, 139, 250, 0.4); color: #c084fc;">
+            📶 WiFi QR (Cafe WPA)
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden canvas for image decoding via jsQR -->
+      <canvas id="qr-canvas" class="visually-hidden"></canvas>
+    </section>
+
+    <!-- Simple Mode Card for Elderly Users (Big Display & Green/Yellow/Red Color) -->
+    <section id="simple-results-section" class="simple-card simple-safe" aria-live="polite" hidden>
+      <div class="simple-icon-bubble" id="simple-icon" aria-hidden="true">🛡️</div>
+      <div class="simple-verdict-badge" id="simple-badge">SAFE</div>
+      <h2 class="simple-verdict-title" id="simple-title">SAFE TO USE</h2>
+      <p class="simple-message-text" id="simple-message">
+        No viruses, fake websites, or scams were found. This QR code appears completely safe to use.
+      </p>
+      <div class="simple-subnote" id="simple-subnote" hidden>
+        <!-- Populated dynamically with large font details for UPI or WiFi -->
+      </div>
+      <div class="simple-actions-wrap">
+        <button type="button" id="btn-simple-reset" class="btn-elder-scan" title="Scan or upload another QR code">
+          <span aria-hidden="true">🔄</span> Scan Another Code
+        </button>
+        <button type="button" id="btn-view-details" class="btn-elder-details" title="Show all technical findings and security checklist">
+          🔍 Show Full Technical Report
+        </button>
+      </div>
+    </section>
+
+    <!-- Results Section (Dynamic Verdict) -->
+    <section id="results-section" class="card results-card" aria-live="polite" hidden>
+      <div class="results-header">
+        <div>
+          <h2 class="card-title">2. Threat Analysis Verdict</h2>
+          <p class="card-subtitle">Local rule-based heuristic inspection results.</p>
+        </div>
+        <button id="btn-reset" class="btn btn-outline" title="Clear current analysis and start fresh">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          Scan Another
+        </button>
+      </div>
+
+      <!-- Verdict Banner & Score Box -->
+      <div id="verdict-banner" class="verdict-banner verdict-safe">
+        <div class="verdict-badge-wrap">
+          <div class="verdict-icon" id="verdict-icon" aria-hidden="true">🛡️</div>
+          <div>
+            <div class="verdict-badge" id="verdict-badge">SAFE</div>
+            <div class="verdict-headline" id="verdict-headline">Low risk detected from standard heuristic patterns</div>
+          </div>
+        </div>
+        <div class="score-container" aria-label="Threat level percentage">
+          <div class="score-circle">
+            <span id="threat-score" class="score-value">0%</span>
+            <span id="threat-severity" class="score-severity">Low</span>
+          </div>
+          <span class="score-label" id="threat-label">THREAT LEVEL</span>
+        </div>
+      </div>
+
+      <!-- Action Guidance Card (What should the user do?) -->
+      <div id="action-guidance" class="action-guidance safe">
+        <div class="guidance-icon" id="guidance-icon">ℹ️</div>
+        <div class="guidance-text">
+          <strong id="guidance-title">Safe to Proceed with Caution</strong>
+          <p id="guidance-description">No obvious phishing or malicious characteristics were found. Always double check who you are interacting with.</p>
+        </div>
+      </div>
+
+      <!-- Decoded Content Section (Never opened or fetched) -->
+      <div class="decoded-content-wrapper">
+        <div class="decoded-header">
+          <label for="decoded-text-box" class="decoded-label">
+            <strong>Decoded Payload (Raw Content):</strong>
+          </label>
+          <div class="decoded-actions">
+            <span class="safe-badge-pill" title="Security guarantee: The link was analyzed purely offline without network fetching">
+              🔒 Safe Preview (Never auto-opened)
+            </span>
+            <button id="btn-copy" class="btn btn-sm btn-outline">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Text
+            </button>
+          </div>
+        </div>
+        <div class="decoded-box">
+          <code id="decoded-text-box" tabindex="0"></code>
+        </div>
+        <p class="decoded-caution-note">
+          ⚠️ <strong>Security Notice:</strong> QR Shield purposefully will <u>never</u> open or visit this address. Never copy-paste it into your browser unless you are 100% confident in the sender.
+        </p>
+      </div>
+
+      <!-- Plain-Language Reasons & Heuristic Checks Breakdown -->
+      <div class="reasons-section">
+        <h3 class="section-title">Security Checklist & Plain-Language Findings</h3>
+        <p class="section-subtitle">Every risk is explained in simple language so you understand exactly why it may be dangerous.</p>
+
+        <div id="reasons-list" class="reasons-list">
+          <!-- Populated dynamically by script.js -->
+        </div>
+      </div>
+
+      <!-- Indian UPI Protocol Insights (Shown if UPI payload detected) -->
+      <div id="upi-details-card" class="upi-details-card" hidden>
+        <div class="upi-header">
+          <span class="upi-logo" aria-hidden="true">⚡</span>
+          <h4>UPI Payment Details</h4>
+        </div>
+        <div id="upi-amount-info" class="upi-amount-info" hidden></div>
+        <div class="upi-grid" id="upi-grid">
+          <!-- Populated if UPI -->
+        </div>
+        <div id="upi-warning-box" class="upi-warning-box" hidden></div>
+      </div>
+
+      <!-- WiFi Network Configuration (Shown if WiFi payload detected) -->
+      <div id="wifi-details-card" class="wifi-details-card" hidden>
+        <div class="wifi-header">
+          <span class="wifi-logo" aria-hidden="true">📶</span>
+          <h4>WiFi Network Configuration</h4>
+        </div>
+        <div id="wifi-warning-box" class="wifi-warning-box" hidden></div>
+        <div class="wifi-grid" id="wifi-grid">
+          <!-- Populated if WiFi -->
+        </div>
+      </div>
+
+      <!-- Mandatory Heuristic Disclaimer -->
+      <footer class="heuristic-disclaimer" role="note">
+        <strong>⚠️ Important Advisory:</strong> QR Shield conducts client-side heuristic pattern checks against common fraud patterns (unencrypted links, IP hosting, shorteners, punycode lookalikes, subdomains, and scam keywords). These checks assist in decision making but <em>cannot guarantee absolute safety</em>. Scammers evolve their tactics constantly. When making financial transactions, always independently confirm the recipient's identity.
+      </footer>
+    </section>
+
+    <!-- User Education / Educational Cards Section -->
+    <section class="card education-card" aria-label="Safety tips for students and UPI users">
+      <h3 class="education-title">🛡️ Essential QR & UPI Scam Prevention Guide</h3>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <div class="tip-icon">🛑</div>
+          <h4>The "Scan to Receive Money" Fraud</h4>
+          <p>Scammers on OLX, WhatsApp, or Telegram tell you they want to buy your item or give you a scholarship by sending you a QR code to "receive payment". <strong>Scanning a QR code ALWAYS sends money out of your account; it never receives money.</strong></p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-icon">🔐</div>
+          <h4>The Fake Bank KYC Trap</h4>
+          <p>Phishing QR codes lead to replica login pages asking for your NetBanking credentials, Debit Card details, or OTP under the threat that "Your SIM or Account will be blocked within 24 hours". <strong>Banks never ask for KYC updates via QR codes.</strong></p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-icon">🎁</div>
+          <h4>The "Cashback & Lottery" Lure</h4>
+          <p>Fake scratch cards and QR posters in public places promise ₹2,000 lottery cashbacks. When scanned, they open an authorized UPI collect request disguised as a reward redemption.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p><strong>QR Shield</strong> — Open-Source Threat Analysis for Students & Everyday UPI Users.</p>
+      <p class="footer-privacy">Client-side only: your scans, photos, and clipboard data never leave your browser.</p>
+    </div>
+  </footer>
+
+  <!-- Local jsQR library (100% offline, zero network requests) -->
+  <script src="./jsQR.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

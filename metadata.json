@@ -1,0 +1,10 @@
+{
+  "name": "QR Shield",
+  "description": "Pre-Scan Threat & Phishing Inspector for URLs, UPI payment requests, and Wi-Fi QR codes.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
