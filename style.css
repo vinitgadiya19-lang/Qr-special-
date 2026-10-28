@@ -271,9 +271,9 @@ body {
 
 /* Drop Zone */
 .drop-zone {
-  border: 2px dashed #475569;
+  border: 2px dashed var(--border-subtle);
   border-radius: var(--radius-md);
-  background: rgba(30, 41, 59, 0.4);
+  background: var(--bg-surface-elevated);
   padding: 2.5rem 1.5rem;
   text-align: center;
   cursor: pointer;
@@ -282,9 +282,8 @@ body {
 }
 
 .drop-zone:hover, .drop-zone:focus-visible, .drop-zone.dragover {
-  border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.08);
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+  border-color: var(--border-focus);
+  background: var(--bg-surface-subtle);
 }
 
 .drop-icon {
@@ -401,9 +400,9 @@ body {
 
 /* Paste Zone */
 .paste-zone {
-  border: 2px dashed #475569;
+  border: 2px dashed var(--border-subtle);
   border-radius: var(--radius-md);
-  background: rgba(30, 41, 59, 0.4);
+  background: var(--bg-surface-elevated);
   padding: 3rem 1.5rem;
   text-align: center;
   cursor: pointer;
@@ -412,8 +411,8 @@ body {
 }
 
 .paste-zone:hover, .paste-zone:focus-visible {
-  border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.08);
+  border-color: var(--border-focus);
+  background: var(--bg-surface-subtle);
 }
 
 .paste-icon {

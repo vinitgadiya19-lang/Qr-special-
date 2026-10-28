@@ -34,6 +34,20 @@ const cameraVideo = document.getElementById('camera-video');
 const btnStartCamera = document.getElementById('btn-start-camera');
 const btnStopCamera = document.getElementById('btn-stop-camera');
 const cameraError = document.getElementById('camera-error');
+const uploadError = document.getElementById('upload-error');
+const pasteError = document.getElementById('paste-error');
+
+/**
+ * Non-blocking in-UI notification banner helper replacing alert().
+ */
+function showFeedbackError(targetElem, message) {
+  if (!targetElem) return;
+  targetElem.textContent = message;
+  targetElem.hidden = false;
+  setTimeout(() => {
+    targetElem.hidden = true;
+  }, 4500);
+}
 
 // Results & Verdict UI
 const resultsSection = document.getElementById('results-section');
@@ -381,13 +395,24 @@ function analyzeDecodedPayload(rawData) {
         reason: 'The link uses standard encrypted communication (HTTPS).'
       });
     } else {
-      checks.push({
-        name: 'Non-Standard Web Protocol',
-        status: 'warning',
-        penalty: 25,
-        reason: `The link uses a non-standard protocol (${parsedUrl.protocol}) which may trigger unintended device actions.`
-      });
-      score -= 25;
+      const proto = parsedUrl.protocol.toLowerCase();
+      if (['javascript:', 'data:', 'vbscript:', 'file:'].includes(proto)) {
+        checks.push({
+          name: 'Dangerous Executable Scheme',
+          status: 'danger',
+          penalty: 100,
+          reason: `The link uses an executable script or file scheme (${parsedUrl.protocol}) which can execute malicious code or access local files.`
+        });
+        score = 0;
+      } else {
+        checks.push({
+          name: 'Non-Standard Web Protocol',
+          status: 'warning',
+          penalty: 25,
+          reason: `The link uses a non-standard protocol (${parsedUrl.protocol}) which may trigger unintended device actions.`
+        });
+        score -= 25;
+      }
     }
 
     // Check 4: Raw IP Address as Host
@@ -1118,7 +1143,8 @@ function escapeHtml(str) {
 function decodeQrFromImage(img) {
   // Check if jsQR is loaded
   if (typeof jsQR === 'undefined') {
-    alert('The jsQR decoding library is not loaded. Please ensure jsQR.js is in the same folder.');
+    console.error('The jsQR decoding library is not loaded. Please ensure jsQR.js is in the same folder.');
+    showFeedbackError(uploadError, 'QR decoding engine is initializing or unavailable. Please reload the page.');
     return null;
   }
 
@@ -1198,10 +1224,11 @@ function decodeQrFromVideo(video) {
  * Handles an image file received via upload or clipboard paste.
  * 
  * @param {File|Blob} file - The image file to decode.
+ * @param {HTMLElement} [errorTarget=uploadError] - The target error banner element.
  */
-function handleImageFile(file) {
+function handleImageFile(file, errorTarget = uploadError) {
   if (!file || !file.type.startsWith('image/')) {
-    alert('Please provide a valid image file (PNG, JPG, WEBP).');
+    showFeedbackError(errorTarget, 'Please provide a valid image file (PNG, JPG, WEBP).');
     return;
   }
 
@@ -1214,11 +1241,11 @@ function handleImageFile(file) {
         const analysis = analyzeDecodedPayload(decodedText);
         renderAnalysisResults(decodedText, analysis);
       } else {
-        alert('No QR code detected in this image. Please ensure the QR code is clearly visible, well-lit, and not overly distorted.');
+        showFeedbackError(errorTarget, 'No QR code detected in this image. Please ensure the QR code is clearly visible, well-lit, and not overly distorted.');
       }
     };
     img.onerror = function() {
-      alert('Failed to load image file.');
+      showFeedbackError(errorTarget, 'Failed to load image file. Please try another image.');
     };
     img.src = e.target.result;
   };
@@ -1420,24 +1447,37 @@ btnStopCamera.addEventListener('click', stopCameraScanner);
 
 // Clipboard Paste Handler (Ctrl+V anywhere on window or inside paste zone)
 window.addEventListener('paste', (e) => {
-  const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+  const clipboardData = e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData);
+  if (!clipboardData) return;
+
+  const items = clipboardData.items;
   let imageFound = false;
 
-  for (let i = 0; i < items.length; i++) {
-    if (items[i].type.indexOf('image') !== -1) {
-      const blob = items[i].getAsFile();
-      handleImageFile(blob);
-      imageFound = true;
-      break;
+  if (items) {
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf('image') !== -1) {
+        const blob = items[i].getAsFile();
+        if (blob) {
+          handleImageFile(blob, pasteError);
+          imageFound = true;
+          break;
+        }
+      }
     }
   }
 
   if (!imageFound) {
     // If text was pasted, check if user pasted a URL or UPI text directly
-    const pastedText = e.clipboardData.getData('text');
+    const pastedText = clipboardData.getData ? clipboardData.getData('text') : '';
     if (pastedText && pastedText.trim().length > 0) {
       const analysis = analyzeDecodedPayload(pastedText.trim());
       renderAnalysisResults(pastedText.trim(), analysis);
+    } else {
+      // If the user was focused on the paste panel, show feedback
+      const pastePanel = document.getElementById('panel-paste');
+      if (pastePanel && !pastePanel.hidden) {
+        showFeedbackError(pasteError, 'No QR code image or text found in clipboard. Please copy a QR screenshot first.');
+      }
     }
   }
 });
