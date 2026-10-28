@@ -27,19 +27,41 @@
           <p class="brand-tagline">Pre-Scan Threat & Phishing Inspector</p>
         </div>
       </div>
-      <!-- Simple Mode Toggle for Elders -->
-      <div class="elder-mode-toggle-wrap" role="region" aria-label="Simple mode toggle for elders">
-        <label class="elder-mode-toggle" for="toggle-simple-mode" title="Toggle simplified view with large cards and plain-language warnings for seniors">
-          <span class="elder-mode-icon" aria-hidden="true">👓</span>
-          <span class="elder-mode-text">
-            <strong>Simple Mode</strong>
-            <small>For Elders</small>
-          </span>
-          <input type="checkbox" id="toggle-simple-mode" class="visually-hidden">
-          <div class="switch-ui" id="switch-ui-slider">
-            <span class="switch-slider"></span>
-          </div>
-        </label>
+      <!-- Header Actions: Theme Toggle + Simple Mode -->
+      <div class="header-actions">
+        <!-- Bright / Dark Theme Toggle Button -->
+        <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Toggle bright or dark mode" title="Switch between Dark and Bright mode">
+          <svg class="theme-icon icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="theme-icon icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span id="theme-toggle-label">Bright</span>
+        </button>
+
+        <!-- Simple Mode Toggle for Elders -->
+        <div class="elder-mode-toggle-wrap" role="region" aria-label="Simple mode toggle for elders">
+          <label class="elder-mode-toggle" for="toggle-simple-mode" title="Toggle simplified view with large cards and plain-language warnings for seniors">
+            <span class="elder-mode-icon" aria-hidden="true">👓</span>
+            <span class="elder-mode-text">
+              <strong>Simple Mode</strong>
+              <small>For Elders</small>
+            </span>
+            <input type="checkbox" id="toggle-simple-mode" class="visually-hidden">
+            <div class="switch-ui" id="switch-ui-slider">
+              <span class="switch-slider"></span>
+            </div>
+          </label>
+        </div>
       </div>
     </div>
   </header>
@@ -48,14 +70,14 @@
     <!-- Simple Mode Status Indicator Banner for Seniors -->
     <div id="simple-mode-banner" class="simple-mode-banner" hidden>
       <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 1.35rem;" aria-hidden="true">👓</span>
+        <span style="font-size: 1.25rem;" aria-hidden="true">👓</span>
         <div>
-          <strong style="color: #ffffff;">Simple Mode is Active:</strong>
-          <span>Big, elder-friendly card with simple Safe/Warning messages will be shown.</span>
+          <strong>Elderly Simple Mode Active:</strong>
+          <span>High-visibility card with plain-language safety alerts.</span>
         </div>
       </div>
-      <button type="button" id="btn-disable-simple-mode" class="btn btn-sm btn-outline" style="border-color: rgba(56, 189, 248, 0.4); color: #bae6fd;">
-        Switch to Detailed Mode
+      <button type="button" id="btn-disable-simple-mode" class="btn btn-sm btn-outline">
+        Switch to Standard Mode
       </button>
     </div>
 
@@ -135,26 +157,28 @@
           <p class="drop-text-primary">Press <strong>Ctrl + V</strong> (or <strong>Cmd + V</strong>) anywhere on this page</p>
           <p class="drop-text-secondary">Take a screenshot of any QR code with Snipping Tool / screenshot shortcut and paste directly</p>
         </div>
-      <!-- Quick Test Presets (from official test fixtures) -->
-      <div class="demo-samples-wrapper" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--border-subtle);">
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; font-weight: 500;">
-          🧪 <strong>Try Official Test Examples (1-Click Instant Analysis):</strong>
+      </div>
+
+      <!-- Quick Test Presets (Official test fixtures) -->
+      <div class="demo-samples-wrapper">
+        <p class="demo-samples-title">
+          <span>Test Scenarios (1-Click Analysis):</span>
         </p>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="https://www.wikipedia.org" style="border-color: rgba(16, 185, 129, 0.4); color: #34d399;">
-            ✅ Safe URL (Wikipedia)
+        <div class="demo-presets-row">
+          <button type="button" class="demo-preset-btn" data-payload="https://www.wikipedia.org">
+            <span class="demo-dot safe" aria-hidden="true"></span> Safe Link (Wikipedia)
           </button>
-          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="https://bit.ly/3DemoXyz" style="border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
-            ⚠️ Caution (Shortener)
+          <button type="button" class="demo-preset-btn" data-payload="https://bit.ly/3DemoXyz">
+            <span class="demo-dot caution" aria-hidden="true"></span> Caution Shortener (bit.ly)
           </button>
-          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="http://192.168.10.5/login/verify-kyc" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
-            🚨 Danger (Raw IP + KYC Phish)
+          <button type="button" class="demo-preset-btn" data-payload="http://192.168.10.5/login/verify-kyc">
+            <span class="demo-dot danger" aria-hidden="true"></span> Danger (Raw IP + KYC Phish)
           </button>
-          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="upi://pay?pa=demo.person@fakebank&pn=Demo%20Payee&am=250" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
-            ⚡ Payment QR (UPI ₹250)
+          <button type="button" class="demo-preset-btn" data-payload="upi://pay?pa=demo.person@fakebank&pn=Demo%20Payee&am=250">
+            <span class="demo-dot payment" aria-hidden="true"></span> UPI Payment (₹250)
           </button>
-          <button type="button" class="btn btn-sm btn-outline demo-preset-btn" data-payload="WIFI:S:Demo-Cafe;T:WPA;P:fakepass123;H:false;;" style="border-color: rgba(167, 139, 250, 0.4); color: #c084fc;">
-            📶 WiFi QR (Cafe WPA)
+          <button type="button" class="demo-preset-btn" data-payload="WIFI:S:Demo-Cafe;T:WPA;P:fakepass123;H:false;;">
+            <span class="demo-dot wifi" aria-hidden="true"></span> Wi-Fi Network (WPA)
           </button>
         </div>
       </div>

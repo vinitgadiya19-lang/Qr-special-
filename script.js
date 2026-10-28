@@ -81,6 +81,43 @@ let isSimpleMode = localStorage.getItem('qr_shield_simple_mode') === null ? true
 let lastRawData = null;
 let lastAnalysis = null;
 
+// Theme Mode (Dark and Bright)
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeToggleLabel = document.getElementById('theme-toggle-label');
+
+function getSavedTheme() {
+  const saved = localStorage.getItem('qr_shield_theme');
+  if (saved === 'light' || saved === 'dark') return saved;
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    return 'light';
+  }
+  return 'dark';
+}
+
+let activeTheme = getSavedTheme();
+
+function applyTheme(theme) {
+  activeTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('qr_shield_theme', theme);
+  if (themeToggleLabel) {
+    themeToggleLabel.textContent = theme === 'dark' ? 'Bright' : 'Dark';
+  }
+  if (themeToggleBtn) {
+    themeToggleBtn.setAttribute('title', `Switch to ${theme === 'dark' ? 'Bright' : 'Dark'} mode`);
+    themeToggleBtn.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'Bright' : 'Dark'} mode`);
+  }
+}
+
+// Apply theme on script initialization
+applyTheme(activeTheme);
+
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    applyTheme(activeTheme === 'dark' ? 'light' : 'dark');
+  });
+}
+
 // Heuristic Threat Intelligence Configuration
 // ============================================================================
 
