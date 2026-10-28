@@ -60,6 +60,10 @@ const wifiWarningBox = document.getElementById('wifi-warning-box');
 const wifiGrid = document.getElementById('wifi-grid');
 const btnCopy = document.getElementById('btn-copy');
 const btnReset = document.getElementById('btn-reset');
+const btnOpenLink = document.getElementById('btn-open-link');
+const btnOpenLinkText = document.getElementById('btn-open-link-text');
+const btnSimpleOpenLink = document.getElementById('btn-simple-open-link');
+const btnSimpleOpenLinkText = document.getElementById('btn-simple-open-text');
 
 // Simple Mode for Elderly / Senior Users
 const toggleSimpleMode = document.getElementById('toggle-simple-mode');
@@ -881,6 +885,9 @@ function renderAnalysisResults(rawData, analysis) {
     wifiGrid.innerHTML = '';
   }
 
+  // Update Open Link button state based on safety verdict
+  updateOpenLinkButtons(rawData, analysis);
+
   // Populate the Simple Mode Card for Elders
   renderSimpleModeCard(rawData, analysis);
 
@@ -895,6 +902,87 @@ function renderAnalysisResults(rawData, analysis) {
     if (simpleResultsSection) simpleResultsSection.hidden = true;
     resultsSection.hidden = false;
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+/**
+ * Updates the 'Open Link' button state based on the calculated risk level.
+ * The button functions ONLY when risk level is Safe or Medium (Caution).
+ * In High Risk (Danger / scam), the button is strictly disabled and locked.
+ */
+function updateOpenLinkButtons(rawData, analysis) {
+  if (!btnOpenLink) return;
+
+  const trimmed = (rawData || '').trim();
+
+  // Evaluate risk level:
+  // Threat percentage > 60%, or verdict is DANGER, or UPI note with matched scam keywords
+  const isHighRisk = (analysis.verdict === 'DANGER') ||
+                     (analysis.upi && Boolean(analysis.upi.warningNote)) ||
+                     (analysis.score !== undefined && (100 - Math.max(0, Math.min(100, analysis.score))) > 60);
+
+  // Check if the payload is an openable URL destination
+  const isHttpUrl = /^https?:\/\//i.test(trimmed);
+  const isBareDomain = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(trimmed) && !trimmed.includes(' ');
+  const isUpiScheme = /^upi:\/\/pay/i.test(trimmed);
+  const hasOpenableTarget = isHttpUrl || isBareDomain || isUpiScheme;
+
+  let targetUrl = '';
+  if (isHttpUrl || isUpiScheme) {
+    targetUrl = trimmed;
+  } else if (isBareDomain) {
+    targetUrl = 'https://' + trimmed;
+  }
+
+  if (isHighRisk) {
+    // HIGH RISK: Strictly blocked and disabled
+    btnOpenLink.removeAttribute('href');
+    btnOpenLink.setAttribute('aria-disabled', 'true');
+    btnOpenLink.classList.add('disabled');
+    btnOpenLink.setAttribute('title', 'Blocked for your safety: This QR code is flagged as High Risk / Phishing.');
+    if (btnOpenLinkText) btnOpenLinkText.textContent = 'Link Blocked (High Risk)';
+
+    if (btnSimpleOpenLink) {
+      btnSimpleOpenLink.removeAttribute('href');
+      btnSimpleOpenLink.setAttribute('aria-disabled', 'true');
+      btnSimpleOpenLink.classList.add('disabled');
+      btnSimpleOpenLink.setAttribute('title', 'Blocked: High danger detected.');
+      if (btnSimpleOpenLinkText) btnSimpleOpenLinkText.textContent = '🚫 Blocked (High Risk)';
+    }
+  } else if (hasOpenableTarget) {
+    // SAFE OR MEDIUM RISK: Link is enabled and safe to open
+    btnOpenLink.setAttribute('href', targetUrl);
+    btnOpenLink.removeAttribute('aria-disabled');
+    btnOpenLink.classList.remove('disabled');
+    btnOpenLink.setAttribute('title', `Open ${targetUrl} in a new tab`);
+    if (btnOpenLinkText) {
+      btnOpenLinkText.textContent = isUpiScheme ? 'Open Payment Link' : 'Open Link';
+    }
+
+    if (btnSimpleOpenLink) {
+      btnSimpleOpenLink.setAttribute('href', targetUrl);
+      btnSimpleOpenLink.removeAttribute('aria-disabled');
+      btnSimpleOpenLink.classList.remove('disabled');
+      btnSimpleOpenLink.setAttribute('title', `Open ${targetUrl}`);
+      if (btnSimpleOpenLinkText) {
+        btnSimpleOpenLinkText.textContent = isUpiScheme ? 'Open Payment Link' : 'Open Link';
+      }
+    }
+  } else {
+    // Non-link payload (e.g., WiFi, plain text)
+    btnOpenLink.removeAttribute('href');
+    btnOpenLink.setAttribute('aria-disabled', 'true');
+    btnOpenLink.classList.add('disabled');
+    btnOpenLink.setAttribute('title', 'No web link detected in this QR code.');
+    if (btnOpenLinkText) btnOpenLinkText.textContent = 'No Link to Open';
+
+    if (btnSimpleOpenLink) {
+      btnSimpleOpenLink.removeAttribute('href');
+      btnSimpleOpenLink.setAttribute('aria-disabled', 'true');
+      btnSimpleOpenLink.classList.add('disabled');
+      btnSimpleOpenLink.setAttribute('title', 'No web link to open.');
+      if (btnSimpleOpenLinkText) btnSimpleOpenLinkText.textContent = 'No Web Link';
+    }
   }
 }
 
@@ -1392,6 +1480,12 @@ btnReset.addEventListener('click', () => {
   if (upiWarningBox) upiWarningBox.hidden = true;
   if (wifiDetailsCard) wifiDetailsCard.hidden = true;
   if (wifiWarningBox) wifiWarningBox.hidden = true;
+  if (btnOpenLink) {
+    btnOpenLink.removeAttribute('href');
+    btnOpenLink.classList.remove('disabled');
+    btnOpenLink.removeAttribute('aria-disabled');
+    if (btnOpenLinkText) btnOpenLinkText.textContent = 'Open Link';
+  }
   stopCameraScanner();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
@@ -1408,10 +1502,31 @@ if (btnSimpleReset) {
     if (upiWarningBox) upiWarningBox.hidden = true;
     if (wifiDetailsCard) wifiDetailsCard.hidden = true;
     if (wifiWarningBox) wifiWarningBox.hidden = true;
+    if (btnSimpleOpenLink) {
+      btnSimpleOpenLink.removeAttribute('href');
+      btnSimpleOpenLink.classList.remove('disabled');
+      btnSimpleOpenLink.removeAttribute('aria-disabled');
+      if (btnSimpleOpenLinkText) btnSimpleOpenLinkText.textContent = 'Open Link';
+    }
     stopCameraScanner();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 }
+
+// Intercept click on disabled Open Link buttons to prevent any accidental navigation
+function attachOpenLinkSafetyCheck(btn) {
+  if (!btn) return;
+  btn.addEventListener('click', (e) => {
+    if (btn.classList.contains('disabled') || btn.getAttribute('aria-disabled') === 'true' || !btn.getAttribute('href')) {
+      e.preventDefault();
+      e.stopPropagation();
+      btn.style.animation = 'shake 0.35s ease';
+      setTimeout(() => { btn.style.animation = ''; }, 350);
+    }
+  });
+}
+attachOpenLinkSafetyCheck(btnOpenLink);
+attachOpenLinkSafetyCheck(btnSimpleOpenLink);
 
 // Simple Mode "Show Full Technical Report" Button
 if (btnViewDetails) {
